@@ -15,7 +15,7 @@ def enter_path():
 
 def create_hash(file_list):
     """
-    Creates inverted index of format {word:{documentID:[indeces of positions]}}
+    Creates inverted index of format {word:{documentID:[indices of positions]}}
     """
 
     hashtable= dict()
@@ -45,7 +45,55 @@ def create_hash(file_list):
 
     return hashtable, fileID_names
 
-files=enter_path()
-hashtable, fileID_to_names= create_hash(files)
+def input_word():
+    """
+    Takes word to be searched as an input from the user and returns it.
+    """
+    search_user= raw_input("Enter word to search: ")
+    return search_user.lower()
 
-print files, fileID_to_names, hashtable
+def search_hash(word_input,hashtable):
+    """
+    Searches if the word input matches any entry in the hashtable. If yes, it
+    returns document IDs and indices
+    """
+    if word_input in hashtable:
+        return hashtable[word_input]
+    return None
+
+def files_containing(info,map_ds):
+    """
+    map_ds maps document IDs to document names. If document IDs are enlisted in 
+    info, a list of all the file names corresponding to the IDs is returned, and
+    None otherwise.
+    """
+    if info==None:
+        return None
+    else:
+        files= list()
+        for key in info.keys():
+            files.append(map_ds[key])
+        return files
+
+def display_content(file_list):
+    """
+    Displays file names containing the word. All entries from file_list displayed
+    on single line.
+    """
+    if all_files!=None:
+        for value in all_files:
+            print value
+    else:
+        print "Word exists in none of the files"
+
+
+files= enter_path()
+hashtable, fileID_to_names= create_hash(files)
+entry_by_user= input_word()
+availability_info=search_hash(entry_by_user,hashtable)
+all_files= files_containing(availability_info,fileID_to_names)
+display_content(all_files)
+
+
+#print availability_info
+#print files, fileID_to_names, hashtable
