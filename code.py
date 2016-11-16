@@ -15,14 +15,14 @@ for each_file in file_list:
             word_list.append(wlist)
         word_list=[x.lower() for word in word_list for x in word if len(x)>=3]
         docid = id(word_list)
-        print word_list
+
 
         for each_word in word_list:
-            doc=list()
+            doc=dict()
+            doc[docid]=[i for i, j in enumerate(word_list) if j == each_word]
             if each_word not in hashtable.keys():
-                doc.append(docid)
                 hashtable[each_word]=doc
             else:
-                hashtable[each_word].append(docid)
+                hashtable[each_word][docid]=doc[docid]
 
 print hashtable
