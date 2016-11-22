@@ -3,6 +3,7 @@
 import re
 import os
 from os.path import join
+from collections import Counter
 
 
 def enter_path():
@@ -30,8 +31,7 @@ def enter_path():
                 for file_add in next(os.walk(path_input))[2]])
 
     else:
-        print 'enter correst choice "y" for yes and "n" for no\n'
-        enter_path()
+        raise SystemExit('\nenter correct choice "y" for yes and "n" for no.\n')
 
     return filenames
 
@@ -102,17 +102,6 @@ def files_containing(info,map_ds):
             files.append(map_ds[key])
         return files
 
-def display_content(all_files):
-    """
-    Displays file names containing the word. All entries from complete_file_set
-    displayed on single line.
-    """
-
-    if all_files!=None:
-        for value in all_files:
-            print value
-    else:
-        print "Word exists in none of the files"
 
 def search_user_entries(entry_by_user):
     """
@@ -120,15 +109,41 @@ def search_user_entries(entry_by_user):
     searches for all entries in the hashtable.
     """
 
+    ranks=Counter(dict())
     entry_by_user=entry_by_user.split()
     complete_file_set=set()
     for entry in entry_by_user:
         availability_info=search_hash(entry,hashtable)
-        all_files= files_containing(availability_info,fileID_to_names)
-        complete_file_set |= set(all_files)
+        ranks+=ranking(availability_info,fileID_to_names)
+                    #call ranking, pass availability_info
+    sorted_display(ranks)
 
-    display_content(complete_file_set)
 
+def sorted_display(ranks):
+    """
+    Displays file names containing the word. All entries from complete_file_set
+    displayed on single line.
+    """
+
+    print ranks
+    if ranks!=None:
+        rank=1
+        while ranks:
+            outputs=[key for m in [max(ranks.values())] for key,val in ranks.iteritems() if val == m]
+            for output in outputs:
+                print rank, output
+                del ranks[output]
+                rank+=1
+    else:
+        print "Word exists in none of the files"
+
+
+
+def ranking(availability_info,mapds):
+    rank=Counter(dict())
+    for key in availability_info.keys():
+        rank[mapds[key]]=len(availability_info[key])
+    return rank
 
 
 #Function calls
@@ -137,8 +152,6 @@ files= enter_path()
 hashtable, fileID_to_names= create_hash(files)
 entry_by_user= input_word()
 search_user_entries(entry_by_user)
-
-
 
 
 #print availability_info
