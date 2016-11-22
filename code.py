@@ -36,6 +36,8 @@ def enter_path():
     return filenames
 
 
+"""imp to debug ::: try except clause instead of SystemExit to avoid bug when entering incorrect input for the first time."""
+
 def create_hash(file_list):
     """
     Creates inverted index of format {word:{documentID:[indices of positions]}}
@@ -114,7 +116,10 @@ def search_user_entries(entry_by_user):
     complete_file_set=set()
     for entry in entry_by_user:
         availability_info=search_hash(entry,hashtable)
-        ranks+=ranking(availability_info,fileID_to_names)
+        if availability_info:
+            ranks+=ranking(availability_info,fileID_to_names)
+        else:
+            sorted_display(None)
                     #call ranking, pass availability_info
     sorted_display(ranks)
 
@@ -125,7 +130,6 @@ def sorted_display(ranks):
     displayed on single line.
     """
 
-    print ranks
     if ranks!=None:
         rank=1
         while ranks:
