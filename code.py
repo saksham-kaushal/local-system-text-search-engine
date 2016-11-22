@@ -7,6 +7,7 @@ def enter_path():
     Takes directory location as input and returns a list of files available in
     the directory.
     """
+
     path=raw_input("Enter path (format- /path/to/folder): ")
     file_list = glob.glob(path+"/*.txt")
     #enlists only the contents of directory, not the subdirectories-scope of improvement using regex or glob
@@ -49,6 +50,7 @@ def input_word():
     """
     Takes word to be searched as an input from the user and returns it.
     """
+
     search_user= raw_input("Enter word to search: ")
     return search_user.lower()
 
@@ -57,16 +59,19 @@ def search_hash(word_input,hashtable):
     Searches if the word input matches any entry in the hashtable. If yes, it
     returns document IDs and indices
     """
+
     if word_input in hashtable:
         return hashtable[word_input]
-    return None
+    else:
+        return None
 
 def files_containing(info,map_ds):
     """
-    map_ds maps document IDs to document names. If document IDs are enlisted in 
+    map_ds maps document IDs to document names. If document IDs are enlisted in
     info, a list of all the file names corresponding to the IDs is returned, and
     None otherwise.
     """
+
     if info==None:
         return None
     else:
@@ -75,24 +80,38 @@ def files_containing(info,map_ds):
             files.append(map_ds[key])
         return files
 
-def display_content(file_list):
+def display_content(all_files):
     """
-    Displays file names containing the word. All entries from file_list displayed
-    on single line.
+    Displays file names containing the word. All entries from complete_file_set
+    displayed on single line.
     """
+
     if all_files!=None:
         for value in all_files:
             print value
     else:
         print "Word exists in none of the files"
 
+def search_user_entries(entry_by_user):
+    """
+    Support for searching multiple entries by the user. iterates over a list and
+    searches for all entries in the hashtable.
+    """
+
+    entry_by_user=entry_by_user.split()
+    complete_file_set=set()
+    for entry in entry_by_user:
+        availability_info=search_hash(entry,hashtable)
+        all_files= files_containing(availability_info,fileID_to_names)
+        complete_file_set |= set(all_files)
+
+    display_content(complete_file_set)
+
 
 files= enter_path()
 hashtable, fileID_to_names= create_hash(files)
 entry_by_user= input_word()
-availability_info=search_hash(entry_by_user,hashtable)
-all_files= files_containing(availability_info,fileID_to_names)
-display_content(all_files)
+search_user_entries(entry_by_user)
 
 
 #print availability_info
