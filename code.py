@@ -1,17 +1,39 @@
-import glob
+#!/usr/bin/python
+
 import re
+import os
+from os.path import join
 
 
 def enter_path():
     """
     Takes directory location as input and returns a list of files available in
-    the directory.
+    the directory or in directory along with its subdirectories depending on
+    another user input.
     """
 
-    path=raw_input("Enter path (format- /path/to/folder): ")
-    file_list = glob.glob(path+"/*.txt")
-    #enlists only the contents of directory, not the subdirectories-scope of improvement using regex or glob
-    return file_list
+    path_input=raw_input("Enter path (format- /path/to/folder): ")
+    subs= raw_input("Do you want to search subdirectories (y/n): ").lower()
+    filenames=list()
+    if subs == "y":
+        for root, dirs, files in os.walk(path_input):
+            files=filter(lambda x: x.endswith(".txt"), files)
+                            #only files with .txt extension considered
+            filenames+=[join(root,name) for name in files]
+            for item in dirs:
+                if item.startswith("."):
+                    #hidden folders removed from dirs list
+                    dirs.remove(item)
+
+    elif subs == "n":
+        filenames = filter(lambda x: x.endswith(".txt"), [os.path.join(path_input,file_add) \
+                for file_add in next(os.walk(path_input))[2]])
+
+    else:
+        print 'enter correst choice "y" for yes and "n" for no\n'
+        enter_path()
+
+    return filenames
 
 
 def create_hash(file_list):
@@ -51,7 +73,7 @@ def input_word():
     Takes word to be searched as an input from the user and returns it.
     """
 
-    search_user= raw_input("Enter word to search: ")
+    search_user= raw_input("Enter word(s) to search: ")
     return search_user.lower()
 
 def search_hash(word_input,hashtable):
@@ -108,10 +130,15 @@ def search_user_entries(entry_by_user):
     display_content(complete_file_set)
 
 
+
+#Function calls
+
 files= enter_path()
 hashtable, fileID_to_names= create_hash(files)
 entry_by_user= input_word()
 search_user_entries(entry_by_user)
+
+
 
 
 #print availability_info
