@@ -1,16 +1,27 @@
 #!/usr/bin/python
 
 import re
+            #for regular expressions
 import os
+            #for file system path traversal
 from os.path import join
+            #for joining paths and file names
 from collections import Counter
+            #for importing Counter dictionaries in ranking
+
+import itertools
+import threading
+import time
+import sys
+            #all 4 used for Loading animation
 
 
 def enter_path():
     """
-    Takes directory location as input and returns a list of files available in
-    the directory or in directory along with its subdirectories depending on
-    another user input.
+    Takes directory location and choice of searching subdirectories as inputs and
+    returns a list of files available in the directory or in directory along
+    with its subdirectories. In case of incorrect input to yes/no, ValueError is
+    raised.
     """
 
     path_input=raw_input("Enter path (format- /path/to/folder): ")
@@ -31,12 +42,11 @@ def enter_path():
                 for file_add in next(os.walk(path_input))[2]])
 
     else:
-        raise SystemExit('\nenter correct choice "y" for yes and "n" for no.\n')
+        raise ValueError
 
     return filenames
 
 
-"""imp to debug ::: try except clause instead of SystemExit to avoid bug when entering incorrect input for the first time."""
 
 def create_hash(file_list):
     """
@@ -45,6 +55,7 @@ def create_hash(file_list):
 
     hashtable= dict()
     fileID_names= dict()
+
 
     for each_file in file_list:
         with open(each_file,'r') as file_handle:
@@ -68,15 +79,22 @@ def create_hash(file_list):
                     hashtable[each_word][docid]=doc[docid]
                                 #if word is contained in previously indexed file
 
+
+    print hashtable
+    #print fileID_names
     return hashtable, fileID_names
+
+
 
 def input_word():
     """
     Takes word to be searched as an input from the user and returns it.
     """
 
-    search_user= raw_input("Enter word(s) to search: ")
+    search_user= raw_input("\nEnter word(s) to search: ")
     return search_user.lower()
+
+
 
 def search_hash(word_input,hashtable):
     """
@@ -88,6 +106,8 @@ def search_hash(word_input,hashtable):
         return hashtable[word_input]
     else:
         return None
+
+
 
 def files_containing(info,map_ds):
     """
@@ -105,6 +125,7 @@ def files_containing(info,map_ds):
         return files
 
 
+
 def search_user_entries(entry_by_user):
     """
     Support for searching multiple entries by the user. iterates over a list and
@@ -113,7 +134,7 @@ def search_user_entries(entry_by_user):
 
     ranks=Counter(dict())
     entry_by_user=entry_by_user.split()
-    complete_file_set=set()
+    #complete_file_set=set()
     for entry in entry_by_user:
         availability_info=search_hash(entry,hashtable)
         if availability_info:
@@ -121,12 +142,14 @@ def search_user_entries(entry_by_user):
         else:
             sorted_display(None)
                     #call ranking, pass availability_info
+    #print ranks
     sorted_display(ranks)
+
 
 
 def sorted_display(ranks):
     """
-    Displays file names containing the word. All entries from complete_file_set
+    Displays file names containing the word. All entries from rank counter
     displayed on single line.
     """
 
@@ -144,18 +167,53 @@ def sorted_display(ranks):
 
 
 def ranking(availability_info,mapds):
+    """
+    Ranks results in the form of key-value pairs as counter dictionary where
+    values represents number of occurances. This can be arranged in ascending
+    order to get the rank.
+    """
     rank=Counter(dict())
     for key in availability_info.keys():
         rank[mapds[key]]=len(availability_info[key])
+    #print rank
     return rank
 
 
-#Function calls
 
-files= enter_path()
-hashtable, fileID_to_names= create_hash(files)
-entry_by_user= input_word()
-search_user_entries(entry_by_user)
+def animate():
+    """
+    Implements animation of Loading while hastable is being built.
+    """
+    for c in itertools.cycle(['|', '/', '-', '\\']):
+        if done:
+            break
+        sys.stdout.write('\rLoading ' + c)
+        sys.stdout.flush()
+        time.sleep(0.1)
+                    #prefer sys.stdout instead of print for continuously updating
+                    #the Loading animation
+
+
+#Function calls
+while True:
+    try:
+        files= enter_path()
+        if not files:
+            raise NameError
+        done=False
+        t = threading.Thread(target=animate)
+        t.start()
+        hashtable, fileID_to_names= create_hash(files)
+        time.sleep(1)
+        done = True
+        print "\nDone building index!!"
+        entry_by_user= input_word()
+        search_user_entries(entry_by_user)
+        break
+    except ValueError:
+        print '\nenter correct choice "y" for yes and "n" for no.\n'
+    except NameError:
+        print '\nInvalid or incorrect address entered.\n'
 
 
 #print availability_info
