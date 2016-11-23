@@ -80,7 +80,7 @@ def create_hash(file_list):
                                 #if word is contained in previously indexed file
 
 
-    print hashtable
+    #print hashtable
     #print fileID_names
     return hashtable, fileID_names
 
@@ -106,23 +106,6 @@ def search_hash(word_input,hashtable):
         return hashtable[word_input]
     else:
         return None
-
-
-
-def files_containing(info,map_ds):
-    """
-    map_ds maps document IDs to document names. If document IDs are enlisted in
-    info, a list of all the file names corresponding to the IDs is returned, and
-    None otherwise.
-    """
-
-    if info==None:
-        return None
-    else:
-        files= list()
-        for key in info.keys():
-            files.append(map_ds[key])
-        return files
 
 
 
